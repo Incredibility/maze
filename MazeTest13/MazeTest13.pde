@@ -1,109 +1,86 @@
 Maze[] py = new Maze[2];
-int[][] dms = {{16, 16}, {16, 16}};
-int wnr;
+boolean win = false;
+color bgc = color(250);
+color stc = color(130);
 
 void setup() {
   size(1280, 720);
   frameRate(60);
   focused = true;
-  for (int[] dim0 : dms) for (int dim1 : dim0) dim1 = constrain(dim1, 2, 252);
+  int[][] dms = {{16, 16}, {16, 16}};
+  for (int i = 0; i < dms.length; i++) for (int j = 0; j < dms[i].length; j++) dms[i][j] = constrain(dms[i][j], 2, int(0.35*min(width, height)));
   float ymg = 0.15*height;
-  py[0] = new Maze(dms[0], 0.45*width, ymg, true);
-  py[1] = new Maze(dms[1], 0.55*width, ymg, false);
-  background(250);
-  stroke(130);
-  strokeWeight(py[0].sw);
-  for (int i = 0; i < py[0].dim[0]; i++) for (int j = 0; j < py[0].dim[1]; j++) {
-    if (py[0].cll[i][j].wll[0]) line(py[0].cll[i][j].x1, py[0].cll[i][j].y1, py[0].cll[i][j].x2, py[0].cll[i][j].y1);
-    if (py[0].cll[i][j].wll[1]) line(py[0].cll[i][j].x2, py[0].cll[i][j].y1, py[0].cll[i][j].x2, py[0].cll[i][j].y2);
-    if (py[0].cll[i][j].wll[2]) line(py[0].cll[i][j].x2, py[0].cll[i][j].y2, py[0].cll[i][j].x1, py[0].cll[i][j].y2);
-    if (py[0].cll[i][j].wll[3]) line(py[0].cll[i][j].x1, py[0].cll[i][j].y2, py[0].cll[i][j].x1, py[0].cll[i][j].y1);
-  }
-  strokeWeight(py[1].sw);
-  for (int i = 0; i < py[1].dim[0]; i++) for (int j = 0; j < py[1].dim[1]; j++) {
-    if (py[1].cll[i][j].wll[0]) line(py[1].cll[i][j].x1, py[1].cll[i][j].y1, py[1].cll[i][j].x2, py[1].cll[i][j].y1);
-    if (py[1].cll[i][j].wll[1]) line(py[1].cll[i][j].x2, py[1].cll[i][j].y1, py[1].cll[i][j].x2, py[1].cll[i][j].y2);
-    if (py[1].cll[i][j].wll[2]) line(py[1].cll[i][j].x2, py[1].cll[i][j].y2, py[1].cll[i][j].x1, py[1].cll[i][j].y2);
-    if (py[1].cll[i][j].wll[3]) line(py[1].cll[i][j].x1, py[1].cll[i][j].y2, py[1].cll[i][j].x1, py[1].cll[i][j].y1);
+  float[][] mg = {{0.45*width, ymg}, {0.55*width, ymg}};
+  py[0] = new Maze(dms[0], mg[0], true);
+  py[1] = new Maze(dms[1], mg[1], false);
+  background(bgc);
+  stroke(stc);
+  for (Maze ply : py) {
+    strokeWeight(ply.sw);
+    for (Cell[] cll0 : ply.cll) for (Cell cll : cll0) {
+      if (cll.wll[0]) line(cll.x1, cll.y1, cll.x2, cll.y1);
+      if (cll.wll[1]) line(cll.x2, cll.y1, cll.x2, cll.y2);
+      if (cll.wll[2]) line(cll.x2, cll.y2, cll.x1, cll.y2);
+      if (cll.wll[3]) line(cll.x1, cll.y2, cll.x1, cll.y1);
+    }
   }
   fill(0, 255, 0);
   strokeWeight(py[0].ssw);
   ellipse(py[0].crt.x3, py[0].crt.y3, py[0].hw, py[0].hw);
   strokeWeight(py[1].ssw);
   ellipse(py[1].crt.x3, py[1].crt.y3, py[1].hw, py[1].hw);
-  if (wnr != 0) {
-    rectMode(CORNERS);
-    stroke(80);
-    fill(0, 100);
-    if (wnr == 1) {
-      strokeWeight(py[1].sw);
-      rect(py[1].cll[0][0].x1, py[1].cll[0][0].y1, py[1].cll[py[1].dim[0] - 1][py[1].dim[1] - 1].x2, py[1].cll[py[1].dim[0] - 1][py[1].dim[1] - 1].y2, py[1].ssw);
-    } else {
-      strokeWeight(py[0].sw);
-      rect(py[0].cll[0][0].x1, py[0].cll[0][0].y1, py[0].cll[py[0].dim[0] - 1][py[0].dim[1] - 1].x2, py[0].cll[py[0].dim[0] - 1][py[0].dim[1] - 1].y2, py[0].ssw);
-    }
-  }
 }
 
 void draw() {
-  println(frameRate);
+  //println(frameRate);
 }
 
 void keyPressed() {
-  if (wnr == 0) {
+  if (!win) {
     noStroke();
-    fill(250);
+    fill(bgc);
     rectMode(CENTER);
     if (key == 'w' && !py[0].crt.wll[0] && !py[0].cll[py[0].crt.i][py[0].crt.j - 1].wll[2] || key == 'W' && !py[0].crt.wll[0] && !py[0].cll[py[0].crt.i][py[0].crt.j - 1].wll[2]) {
       rect(py[0].crt.x3, py[0].crt.y3, py[0].ttw, py[0].ttw);
       py[0].crt = py[0].cll[py[0].crt.i][py[0].crt.j - 1];
-    }
-    else if (key == 'd' && !py[0].crt.wll[1] && !py[0].cll[py[0].crt.i + 1][py[0].crt.j].wll[3] || key == 'D' && !py[0].crt.wll[1] && !py[0].cll[py[0].crt.i + 1][py[0].crt.j].wll[3]) {
+    } else if (key == 'd' && !py[0].crt.wll[1] && !py[0].cll[py[0].crt.i + 1][py[0].crt.j].wll[3] || key == 'D' && !py[0].crt.wll[1] && !py[0].cll[py[0].crt.i + 1][py[0].crt.j].wll[3]) {
       rect(py[0].crt.x3, py[0].crt.y3, py[0].ttw, py[0].ttw);
       py[0].crt = py[0].cll[py[0].crt.i + 1][py[0].crt.j];
-    }
-    else if (key == 's' && !py[0].crt.wll[2] && !py[0].cll[py[0].crt.i][py[0].crt.j + 1].wll[0] || key == 'S' && !py[0].crt.wll[2] && !py[0].cll[py[0].crt.i][py[0].crt.j + 1].wll[0]) {
+    } else if (key == 's' && !py[0].crt.wll[2] && !py[0].cll[py[0].crt.i][py[0].crt.j + 1].wll[0] || key == 'S' && !py[0].crt.wll[2] && !py[0].cll[py[0].crt.i][py[0].crt.j + 1].wll[0]) {
       rect(py[0].crt.x3, py[0].crt.y3, py[0].ttw, py[0].ttw);
       py[0].crt = py[0].cll[py[0].crt.i][py[0].crt.j + 1];
-    }
-    else if (key == 'a' && !py[0].crt.wll[3] && !py[0].cll[py[0].crt.i - 1][py[0].crt.j].wll[1] || key == 'A' && !py[0].crt.wll[3] && !py[0].cll[py[0].crt.i - 1][py[0].crt.j].wll[1]) {
+    } else if (key == 'a' && !py[0].crt.wll[3] && !py[0].cll[py[0].crt.i - 1][py[0].crt.j].wll[1] || key == 'A' && !py[0].crt.wll[3] && !py[0].cll[py[0].crt.i - 1][py[0].crt.j].wll[1]) {
       rect(py[0].crt.x3, py[0].crt.y3, py[0].ttw, py[0].ttw);
       py[0].crt = py[0].cll[py[0].crt.i - 1][py[0].crt.j];
     }
     if (keyCode == UP && !py[1].crt.wll[0] && !py[1].cll[py[1].crt.i][py[1].crt.j - 1].wll[2]) {
       rect(py[0].crt.x3, py[0].crt.y3, py[0].ttw, py[0].ttw);
       py[1].crt = py[1].cll[py[1].crt.i][py[1].crt.j - 1];
-    }
-    else if (keyCode == RIGHT && !py[1].crt.wll[1] && !py[1].cll[py[1].crt.i + 1][py[1].crt.j].wll[3]) {
+    } else if (keyCode == RIGHT && !py[1].crt.wll[1] && !py[1].cll[py[1].crt.i + 1][py[1].crt.j].wll[3]) {
       rect(py[0].crt.x3, py[0].crt.y3, py[0].ttw, py[0].ttw);
       py[1].crt = py[1].cll[py[1].crt.i + 1][py[1].crt.j];
-    }
-    else if (keyCode == DOWN && !py[1].crt.wll[2] && !py[1].cll[py[1].crt.i][py[1].crt.j + 1].wll[0]) {
+    } else if (keyCode == DOWN && !py[1].crt.wll[2] && !py[1].cll[py[1].crt.i][py[1].crt.j + 1].wll[0]) {
       rect(py[0].crt.x3, py[0].crt.y3, py[0].ttw, py[0].ttw);
       py[1].crt = py[1].cll[py[1].crt.i][py[1].crt.j + 1];
-    }
-    else if (keyCode == LEFT && !py[1].crt.wll[3] && !py[1].cll[py[1].crt.i - 1][py[1].crt.j].wll[1]) {
+    } else if (keyCode == LEFT && !py[1].crt.wll[3] && !py[1].cll[py[1].crt.i - 1][py[1].crt.j].wll[1]) {
       rect(py[0].crt.x3, py[0].crt.y3, py[0].ttw, py[0].ttw);
       py[1].crt = py[1].cll[py[1].crt.i - 1][py[1].crt.j];
     }
-    if (py[0].crt == py[0].end) wnr = 1;
-    else if (py[1].crt == py[1].end) wnr = 2;
-    stroke(130);
+    stroke(stc);
     fill(0, 255, 0);
     strokeWeight(py[0].ssw);
     ellipse(py[0].crt.x3, py[0].crt.y3, py[0].hw, py[0].hw);
     strokeWeight(py[1].ssw);
     ellipse(py[1].crt.x3, py[1].crt.y3, py[1].hw, py[1].hw);
-    if (wnr != 0) {
-      rectMode(CORNERS);
-      stroke(80);
-      fill(0, 100);
-      if (wnr == 1) {
-        strokeWeight(py[1].sw);
-        rect(py[1].cll[0][0].x1, py[1].cll[0][0].y1, py[1].cll[py[1].dim[0] - 1][py[1].dim[1] - 1].x2, py[1].cll[py[1].dim[0] - 1][py[1].dim[1] - 1].y2, py[1].ssw);
-      } else {
-        strokeWeight(py[0].sw);
-        rect(py[0].cll[0][0].x1, py[0].cll[0][0].y1, py[0].cll[py[0].dim[0] - 1][py[0].dim[1] - 1].x2, py[0].cll[py[0].dim[0] - 1][py[0].dim[1] - 1].y2, py[0].ssw);
+    for (Maze ply : py) {
+      if (ply.crt == ply.end) {
+        win = true;
+        rectMode(CORNERS);
+        stroke(80);
+        strokeWeight(ply.sw);
+        fill(0, 100);
+        Maze oth = ply == py[0] ? py[1] : py[0];
+        rect(oth.cll[0][0].x1, oth.cll[0][0].y1, oth.cll[oth.dim[0] - 1][oth.dim[1] - 1].x2, oth.cll[oth.dim[0] - 1][oth.dim[1] - 1].y2, oth.ssw);
       }
     }
   }
@@ -113,19 +90,19 @@ class Maze {
   int[] dim;
   float w, hw, ttw, xmg, ymg, sw, ssw;
   Cell[][] cll;
-  Cell gen_crt, crt, end;
-  Maze(int[] dim_, float xmg_, float ymg_, boolean aln_rht_) {
+  Cell crt, end;
+  Maze(int[] dim_, float[] mg_, boolean aln_rht_) {
     dim = dim_;
     w = height < width ? 0.7*height/dim[1] : 0.4*width/dim[0];
     hw = max(1, w/2);
     ttw = max(1, 2*w/3);
-    xmg = aln_rht_ ? xmg_ - dim[0]*w : xmg_;
-    ymg = ymg_;
+    xmg = aln_rht_ ? mg_[0] - dim[0]*w : mg_[0];
+    ymg = mg_[1];
     sw = max(1, 128/max(dim[0], dim[1]));
     ssw = sw/4;
     cll = new Cell[dim[0]][dim[1]];
     for (int i = 0; i < dim[0]; i++) for (int j = 0; j < dim[1]; j++) cll[i][j] = new Cell(i, j, xmg, ymg, w, hw);
-    gen_crt = cll[floor(random(dim[0]))][floor(random(dim[1]))];
+    Cell gen_crt = cll[floor(random(dim[0]))][floor(random(dim[1]))];
     ArrayList<Cell> stk = new ArrayList<Cell>();
     stk.add(gen_crt);
     while (!stk.isEmpty()) {
